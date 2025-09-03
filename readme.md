@@ -118,7 +118,7 @@ pip install torch pandas numpy matplotlib seaborn scikit-learn
 ### Basic Usage
 
 ```python
-from complete_ccci_system import complete_ccci_ga_workflow
+from gats import complete_ccci_ga_workflow
 
 # Run complete analysis with linear head
 results = complete_ccci_ga_workflow(
@@ -141,7 +141,7 @@ insights = results['insights']
 After training a model, generate detailed heatmaps for all GA components:
 
 ```python
-from complete_ccci_system import generate_comprehensive_heatmaps, generate_component_correlation_heatmap
+from gats import generate_comprehensive_heatmaps, generate_component_correlation_heatmap
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler

@@ -896,7 +896,170 @@ def complete_ccci_ga_workflow(
     return results
 
 # ============================================================
-# USAGE EXAMPLES
+# COMPREHENSIVE HEATMAP USAGE EXAMPLES
+# ============================================================
+
+# Example 1: Generate all heatmaps after training a model
+"""
+# Train model first
+results = complete_ccci_ga_workflow(
+    csv_file='ccci_data.csv',
+    epochs=100,
+    head_type='linear'
+)
+
+# Then generate comprehensive heatmaps
+trained_model = results['model']
+data = pd.read_csv('ccci_data.csv')
+data.columns = [col.strip().replace('\r', '') for col in data.columns]
+data['quarter_date'] = pd.to_datetime(data['quarter'])
+
+feature_columns = ["UNRATE", "PSAVERT", "PCE_QoQ", "REVOLSL_QoQ"]
+lookback = 8
+
+# Prepare input tensor (same as in workflow)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(data[feature_columns].values.astype(np.float32))
+X_tensor = torch.tensor(X_scaled, dtype=torch.float32).unsqueeze(0)
+
+# Generate all heatmaps
+heatmap_results = generate_comprehensive_heatmaps(
+    trained_model, X_tensor, data, feature_columns, 
+    lookback=lookback, save_dir="./comprehensive_heatmaps/"
+)
+
+# Generate component correlation heatmap
+correlation_results = generate_component_correlation_heatmap(
+    trained_model, X_tensor, data, feature_columns,
+    save_path="./comprehensive_heatmaps/component_correlations.png"
+)
+
+print("Heatmap Analysis Results:")
+print(f"Crisis Analysis: {heatmap_results['crisis_analysis']}")
+print(f"Files saved: {list(heatmap_results['file_paths'].values())}")
+"""
+
+# Example 2: Focus on specific crisis periods
+"""
+# Define crisis periods of interest
+crisis_periods = {
+    '2008_Financial_Crisis': ('2007Q4', '2009Q2'),
+    'COVID_Recession': ('2020Q2', '2020Q4'),
+    'S&L_Crisis': ('1990Q1', '1991Q1')
+}
+
+# Extract crisis-specific data
+for crisis_name, (start, end) in crisis_periods.items():
+    print(f"\nAnalyzing {crisis_name}:")
+    
+    # Find time indices
+    time_axis = data['quarter'].values
+    start_idx = list(time_axis).index(start) if start in time_axis else None
+    end_idx = list(time_axis).index(end) if end in time_axis else None
+    
+    if start_idx and end_idx:
+        # Adjust for lookback
+        start_idx = max(0, start_idx - lookback)
+        end_idx = min(len(time_axis), end_idx - lookback)
+        
+        print(f"  Period indices: {start_idx} to {end_idx}")
+        print(f"  Quarters: {time_axis[start_idx + lookback]} to {time_axis[end_idx + lookback]}")
+"""
+
+# Example 3: Interactive heatmap analysis
+"""
+def analyze_heatmap_patterns(heatmap_results):
+    '''Analyze patterns in generated heatmaps'''
+    
+    # Extract heatmap data
+    scalar_data = heatmap_results['heatmap_data']['scalar']
+    vector_data = heatmap_results['heatmap_data']['vector'] 
+    bivector_data = heatmap_results['heatmap_data']['bivector']
+    attention_data = heatmap_results['heatmap_data']['attention']
+    
+    # Find periods of highest activity
+    scalar_peaks = np.argmax(np.abs(scalar_data), axis=1)
+    vector_peaks = np.argmax(np.abs(vector_data), axis=1)
+    bivector_peaks = np.argmax(np.abs(bivector_data), axis=1)
+    
+    print("Component Peak Analysis:")
+    print(f"Scalar peaks at quarters: {scalar_peaks}")
+    print(f"Vector peaks at quarters: {vector_peaks}")  
+    print(f"Bivector peaks at quarters: {bivector_peaks}")
+    
+    # Analyze attention patterns
+    attention_entropy = -np.sum(attention_data * np.log(attention_data + 1e-8), axis=0)
+    focused_periods = np.where(attention_entropy < 1.5)[0]  # Low entropy = focused attention
+    distributed_periods = np.where(attention_entropy > 2.0)[0]  # High entropy = distributed
+    
+    print(f"\nAttention Pattern Analysis:")
+    print(f"Focused attention periods: {focused_periods}")
+    print(f"Distributed attention periods: {distributed_periods}")
+    
+    return {
+        'component_peaks': {
+            'scalar': scalar_peaks,
+            'vector': vector_peaks, 
+            'bivector': bivector_peaks
+        },
+        'attention_patterns': {
+            'entropy': attention_entropy,
+            'focused_periods': focused_periods,
+            'distributed_periods': distributed_periods
+        }
+    }
+
+# Run the analysis
+pattern_analysis = analyze_heatmap_patterns(heatmap_results)
+"""
+
+# Example 4: Compare models with different architectures
+"""
+# Train both linear and MLP models
+linear_results = complete_ccci_ga_workflow(
+    csv_file='ccci_data.csv', epochs=100, head_type='linear',
+    output_dir='./linear_analysis/'
+)
+
+mlp_results = complete_ccci_ga_workflow(
+    csv_file='ccci_data.csv', epochs=100, head_type='mlp', 
+    output_dir='./mlp_analysis/'
+)
+
+# Generate heatmaps for both
+linear_heatmaps = generate_comprehensive_heatmaps(
+    linear_results['model'], X_tensor, data, feature_columns,
+    save_dir="./linear_heatmaps/"
+)
+
+mlp_heatmaps = generate_comprehensive_heatmaps(
+    mlp_results['model'], X_tensor, data, feature_columns,
+    save_dir="./mlp_heatmaps/"
+)
+
+# Compare component patterns
+def compare_model_heatmaps(linear_heatmaps, mlp_heatmaps):
+    '''Compare heatmap patterns between models'''
+    
+    # Calculate correlation between corresponding heatmaps
+    correlations = {}
+    for component in ['scalar', 'vector', 'bivector', 'attention']:
+        linear_data = linear_heatmaps['heatmap_data'][component].flatten()
+        mlp_data = mlp_heatmaps['heatmap_data'][component].flatten()
+        correlations[component] = np.corrcoef(linear_data, mlp_data)[0, 1]
+    
+    print("Model Heatmap Correlations:")
+    for component, corr in correlations.items():
+        print(f"  {component}: {corr:.3f}")
+    
+    return correlations
+
+model_correlations = compare_model_heatmaps(linear_heatmaps, mlp_heatmaps)
+"""
+
+# ============================================================
+# USAGE EXAMPLES AND DOCUMENTATION
 # ============================================================
 
 """

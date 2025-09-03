@@ -118,6 +118,157 @@ pip install torch pandas numpy matplotlib seaborn scikit-learn
 ### Basic Usage
 
 ```python
+from complete_ccci_system import complete_ccci_ga_workflow
+
+# Run complete analysis with linear head
+results = complete_ccci_ga_workflow(
+    csv_file='ccci_data.csv',
+    epochs=100,
+    head_type='linear'
+)
+
+# Access results
+trained_model = results['model']
+interpretability = results['interpretability']
+query_analyses = results['query_analyses']
+insights = results['insights']
+```
+
+**Note**: Ensure your CSV has a 'quarter' column in format "1980Q1", "1980Q2", etc. The code automatically creates a 'quarter_date' column for plotting.
+
+### Comprehensive Heatmap Generation
+
+After training a model, generate detailed heatmaps for all GA components:
+
+```python
+from complete_ccci_system import generate_comprehensive_heatmaps, generate_component_correlation_heatmap
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+import torch
+
+# Load and prepare data (same as in workflow)
+data = pd.read_csv('ccci_data.csv')
+data.# Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework
+
+## Overview
+
+This repository implements the framework described in "Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis" by Sudjianto & Setiawan (2025). The framework combines Geometric Algebra (GA) with Linear Attention mechanisms to analyze the time-varying geometric relationships in economic data, particularly focusing on consumer credit cycles.
+
+Unlike traditional econometric models that provide global parameter estimates, our approach captures local, time-varying relationships between economic variables through geometric transformations, revealing mechanistically different crisis patterns even when their linear correlations appear similar.
+
+## Key Innovation
+
+The framework addresses a fundamental limitation in economic time series analysis: traditional methods treat magnitude and phase relationships sequentially, first estimating correlations, then separately analyzing temporal patterns. This assumption breaks down during crisis periods when both magnitude and timing relationships evolve simultaneously.
+
+Our approach unifies these relationships through geometric algebra:
+- **Inner products** capture projection relationships (correlation-like)  
+- **Bivectors** capture rotational dynamics (feedback patterns and spirals)
+- **Linear attention** identifies which historical periods are geometrically similar to current conditions
+
+## Mathematical Foundation
+
+### Geometric Algebra Embedding
+
+Economic variables at time t are embedded as multivectors in G(4,0):
+
+```
+Xt = ut*e1 + st*e2 + rt*e3 + vt*e4
+```
+
+where:
+- ut: unemployment rate
+- st: savings rate  
+- rt: consumption growth
+- vt: revolving credit growth
+
+The multivector representation includes:
+
+```
+Mt = α0 + Σ(αi*ei) + Σ(γij*(xi,t - xj,t)*(ei ∧ ej))
+```
+
+**Components:**
+- **Scalar (α0)**: Baseline trend/intercept
+- **Vectors (αi*ei)**: Individual variable effects
+- **Bivectors (γij*(ei ∧ ej))**: Pairwise variable interactions and feedback patterns
+
+### Linear Attention Mechanism
+
+For each time t with lookback window L:
+
+```
+Qt = φ(WQ*Mt), Kt = φ(WK*Mt), Vt = WV*Mt
+```
+
+where φ(x) = LeakyReLU(x) + 1 ensures positivity with asymmetric economic response modeling.
+
+The context vector is computed as:
+
+```
+Ot = (Qt^T * St) / (Qt^T * Zt + ε)
+```
+
+with sufficient statistics:
+```
+St = Σ(Ki * Vi^T)  [from i=t-L to t-1]
+Zt = Σ(Ki)         [from i=t-L to t-1]  
+```
+
+### Economic Interpretation as Time-Varying Regression
+
+The framework can be viewed as:
+
+```
+yt = β0,t + Σ(βi,t * xi,t) + Σ(γij,t * (xi,t - xj,t)) + εt
+```
+
+where coefficients evolve based on geometric similarity to historical periods:
+
+```
+βi,t = Σ(wj,t * βi,j)  [attention-weighted historical coefficients]
+```
+
+## Architecture Components
+
+### 1. GeometricAlgebraEmbedding
+- Maps 4D economic variables to multivector space
+- Learnable parameters for scalar bias, vector scaling, and bivector weights
+- Captures both individual variable effects and pairwise interactions
+
+### 2. LinearAttention  
+- Efficient O(n) attention mechanism with economic asymmetry modeling
+- Identifies which historical periods are most relevant for current predictions
+- Provides interpretable attention weights for temporal analysis
+
+### 3. Prediction Heads
+- **LinearHead**: Simple linear projection for interpretability
+- **MLPHead**: Multi-layer perceptron for enhanced predictive performance
+
+### 4. Interpretability Framework
+- **Embedding-level occlusion**: Zero out component types to measure impact
+- **Query-side occlusion**: Mask attention patterns to understand focus
+- **Attribution analysis**: Feature and lag-wise contribution decomposition
+
+## Installation & Setup
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd ccci-ga-analysis
+
+# Install dependencies
+pip install torch pandas numpy matplotlib seaborn scikit-learn
+
+# Ensure you have CCCI data file
+# Data should include: quarter, UNRATE, PSAVERT, PCE_QoQ, REVOLSL_QoQ, CORCACBS
+```
+
+## Quick Start
+
+### Basic Usage
+
+```python
 from gats import complete_ccci_ga_workflow
 
 # Run complete analysis with linear head
@@ -321,3 +472,4 @@ We welcome contributions! Areas of particular interest:
 ---
 
 *This framework provides a novel lens for understanding economic dynamics through geometric algebra, moving beyond traditional correlation-based approaches to capture the rotational relationships and feedback patterns that distinguish different crisis mechanisms.*
+

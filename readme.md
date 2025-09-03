@@ -462,7 +462,7 @@ We welcome contributions! Areas of particular interest:
 
 ## License
 
-[Specify your license here]
+[Apache 2.0]
 
 ## Contact
 

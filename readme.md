@@ -118,7 +118,7 @@ pip install torch pandas numpy matplotlib seaborn scikit-learn
 ### Basic Usage
 
 ```python
-from complete_ccci_system import complete_ccci_ga_workflow
+from gats import complete_ccci_ga_workflow
 
 # Run complete analysis with linear head
 results = complete_ccci_ga_workflow(
@@ -149,7 +149,7 @@ results = complete_ccci_ga_workflow(
 )
 
 # Deep dive on individual query
-from complete_ccci_system import analyze_query_attribution
+from gats import analyze_query_attribution
 
 query_analysis = analyze_query_attribution(
     trained_model, X_tensor, query_idx=67, 
@@ -177,7 +177,7 @@ for crisis_name, indices in crisis_periods.items():
 ### 2. Component Stability Analysis
 
 ```python
-from complete_ccci_system import analyze_component_stability
+from gats import analyze_component_stability
 
 stability_analysis = analyze_component_stability(
     trained_model, X_tensor, feature_columns, 
@@ -191,7 +191,7 @@ print("Stability ranking:", stability_analysis['stability_ranking'])
 ### 3. Interactive Query Exploration
 
 ```python
-from complete_ccci_system import create_interactive_query_explorer
+from gats import create_interactive_query_explorer
 
 # Generate HTML interface for exploring any quarter
 create_interactive_query_explorer(

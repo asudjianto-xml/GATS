@@ -3,8 +3,7 @@
 **GATS** (`gats.py`) implements a multivector-based **Geometric Algebra (GA)** representation coupled with **linear attention** for explanatory analysis of consumer credit cycles.  
 It is designed to **explain** the dynamics behind credit charge-offs, not just predict them.
 
-> Paper: **GATS** (`gats.py`) implements a multivector-based **Geometric Algebra (GA)** representation coupled with **linear attention** for explanatory analysis of consumer credit cycles.  
-It is designed to **explain** the dynamics behind credit charge-offs, not just predict them..
+> Paper: "Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis" by Sudjianto & Setiawan (2025).
 
 ---
 
@@ -20,12 +19,9 @@ It is designed to **explain** the dynamics behind credit charge-offs, not just p
   - [`GALinearAttentionModel`](#galinearattentionmodel)
   - [`GeometricAlgebraEmbedding`](#geometricalgebraembedding)
   - [`LinearAttention`](#linearattention)
-  - Heads: [`LinearHead`] and [`MLPHead`](#heads-linearhead-and-mlphead)
-  - Training: [`train_model`](#train_model)
-  - Analysis utilities
-    - `generate_comprehensive_results_analysis`
-    - `analyze_query_attribution` + `visualize_query_analysis`
-    - `generate_comprehensive_heatmaps`
+  - [Heads: `LinearHead` and `MLPHead`](#heads-linearhead-and-mlphead)
+  - [Training: `train_model`](#train_model)
+  - [Analysis utilities](#analysis-utilities)
 - [Reproducing Paper Figures (1–7)](#reproducing-paper-figures-17)
 - [Interpretability Outputs](#interpretability-outputs)
 - [Tips & Troubleshooting](#tips--troubleshooting)
@@ -43,41 +39,39 @@ It is designed to **explain** the dynamics behind credit charge-offs, not just p
 
 ## Mathematical Overview
 
-Let the 4-D standardized macro state at time \(t\) be \(X_t = [u_t, s_t, r_t, v_t]\)  
+Let the 4-D standardized macro state at time *t* be **X**<sub>*t*</sub> = [*u*<sub>*t*</sub>, *s*<sub>*t*</sub>, *r*<sub>*t*</sub>, *v*<sub>*t*</sub>]  
 (unemployment, saving rate, PCE growth, revolving credit growth).
 
 ### GA embedding
-We form a multivector
-\[
-M_t=\underbrace{\alpha_0}_{\text{scalar}}
-+ \sum_{i=1}^4 \alpha_i e_i
-+ \sum_{(i,j)\in\Pi} \gamma_{ij}(x_{t,i}-x_{t,j})(e_i\wedge e_j),
-\]
-with planes \(\Pi=\{(0,1),(0,2),(0,3),(1,2),(1,3),(2,3)\}\).
 
-### Linear attention (feature map \(\phi(x)=\text{LeakyReLU}(x)+1\))
-\[
-Q_t=\phi(W_Q M_t),\quad K_t=\phi(W_K M_t),\quad V_t=W_V M_t,
-\]
-over a lookback window \(\mathcal{W}_t=\{t-L,\ldots,t-1\}\).
-Denote
-\[
-S_t=\sum_{\tau\in\mathcal{W}_t} K_\tau V_\tau^\top,\qquad
-Z_t=\sum_{\tau\in\mathcal{W}_t} K_\tau.
-\]
-Then the normalized context is
-\[
-O_t=\frac{Q_t^\top S_t}{Q_t^\top Z_t + \varepsilon},
-\qquad
-w_{\tau|t}=\frac{Q_t^\top K_\tau}{\sum_{\kappa\in\mathcal{W}_t} Q_t^\top K_\kappa}.
-\]
+We form a multivector:
+
+**M**<sub>*t*</sub> = α<sub>0</sub> + Σ<sub>*i*=1</sub><sup>4</sup> α<sub>*i*</sub> **e**<sub>*i*</sub> + Σ<sub>(*i*,*j*)∈Π</sub> γ<sub>*ij*</sub>(*x*<sub>*t*,*i*</sub> - *x*<sub>*t*,*j*</sub>)(**e**<sub>*i*</sub> ∧ **e**<sub>*j*</sub>)
+
+with planes Π = {(0,1), (0,2), (0,3), (1,2), (1,3), (2,3)}.
+
+### Linear attention (feature map φ(*x*) = LeakyReLU(*x*) + 1)
+
+**Q**<sub>*t*</sub> = φ(**W**<sub>*Q*</sub> **M**<sub>*t*</sub>),  **K**<sub>*t*</sub> = φ(**W**<sub>*K*</sub> **M**<sub>*t*</sub>),  **V**<sub>*t*</sub> = **W**<sub>*V*</sub> **M**<sub>*t*</sub>
+
+over a lookback window W<sub>*t*</sub> = {*t*-*L*, ..., *t*-1}.
+
+Denote:
+- **S**<sub>*t*</sub> = Σ<sub>τ∈W<sub>*t*</sub></sub> **K**<sub>τ</sub> **V**<sub>τ</sub><sup>⊤</sup>
+- **Z**<sub>*t*</sub> = Σ<sub>τ∈W<sub>*t*</sub></sub> **K**<sub>τ</sub>
+
+Then the normalized context is:
+
+**O**<sub>*t*</sub> = (**Q**<sub>*t*</sub><sup>⊤</sup> **S**<sub>*t*</sub>) / (**Q**<sub>*t*</sub><sup>⊤</sup> **Z**<sub>*t*</sub> + ε)
+
+*w*<sub>τ|*t*</sub> = (**Q**<sub>*t*</sub><sup>⊤</sup> **K**<sub>τ</sub>) / (Σ<sub>κ∈W<sub>*t*</sub></sub> **Q**<sub>*t*</sub><sup>⊤</sup> **K**<sub>κ</sub>)
 
 ### Heads
-- **Linear**: \(\hat y_t=w_\text{out}^\top O_t + b\).
-- **MLP**: \(\hat y_t=W_2\,\sigma(W_1 O_t + b_1)+b_2\) (ReLU/GELU).
 
-> Economic note: the **dot product** \(Q_t^\top K_\tau\) is a scalar **geometric similarity**
-between the current multivector state and historical states (suitable for weighting).
+- **Linear**: ŷ<sub>*t*</sub> = **w**<sub>out</sub><sup>⊤</sup> **O**<sub>*t*</sub> + *b*
+- **MLP**: ŷ<sub>*t*</sub> = **W**<sub>2</sub> σ(**W**<sub>1</sub> **O**<sub>*t*</sub> + **b**<sub>1</sub>) + *b*<sub>2</sub> (ReLU/GELU)
+
+> Economic note: the **dot product** **Q**<sub>*t*</sub><sup>⊤</sup> **K**<sub>τ</sub> is a scalar **geometric similarity** between the current multivector state and historical states (suitable for weighting).
 
 ---
 
@@ -182,9 +176,9 @@ complete_ccci_ga_workflow(
 
 **Key parameters**
 
-- `feature_columns`: order matters (maps to GA basis \(e_1..e_4\)).
+- `feature_columns`: order matters (maps to GA basis **e**<sub>1</sub>..**e**<sub>4</sub>).
 - `target_column`: typically `CORCACBS`.
-- `lookback`: attention window \(L\) (8–12 is typical).
+- `lookback`: attention window *L* (8–12 is typical).
 - `train_frac`: temporal split (uses earliest `train_frac` fraction for training).
 - `epochs`: training epochs for AdamW.
 - `head_type`: `"linear"` (interpretable) vs `"mlp"` (higher accuracy).
@@ -240,12 +234,12 @@ embed = GeometricAlgebraEmbedding(
 
 ### `LinearAttention`
 
-- Projections: `W_Q`, `W_K`, `W_V` (learnable `nn.Linear`).
-- Feature map: \(\phi(x)=\text{LeakyReLU}(x)+1\) keeps entries positive to stabilize normalization.
-- Returns `(contexts, attention_weights)` where `attention_weights[:, t, :]` are the normalized \(w_{\tau|t}\).
+- Projections: **W**<sub>*Q*</sub>, **W**<sub>*K*</sub>, **W**<sub>*V*</sub> (learnable `nn.Linear`).
+- Feature map: φ(*x*) = LeakyReLU(*x*) + 1 keeps entries positive to stabilize normalization.
+- Returns `(contexts, attention_weights)` where `attention_weights[:, t, :]` are the normalized *w*<sub>τ|*t*</sub>.
 
 **Structured regularization (built into optimizer factory)**  
-We apply stronger weight decay to `W_Q`/`W_K` than to `W_V` to stabilize similarity while allowing informative values.
+We apply stronger weight decay to **W**<sub>*Q*</sub>/**W**<sub>*K*</sub> than to **W**<sub>*V*</sub> to stabilize similarity while allowing informative values.
 
 ---
 
@@ -270,7 +264,15 @@ train_model(
 ```
 
 > Internally uses `_build_optimizer_for_ga_model` (AdamW) with **grouped decay**:  
-> `W_Q/W_K`: `1e-3`, `W_V`: `1e-4`, others: `weight_decay`.
+> **W**<sub>*Q*</sub>/**W**<sub>*K*</sub>: `1e-3`, **W**<sub>*V*</sub>: `1e-4`, others: `weight_decay`.
+
+---
+
+### Analysis utilities
+
+- `generate_comprehensive_results_analysis`: Creates all 7 paper figures
+- `analyze_query_attribution` + `visualize_query_analysis`: Deep-dive analysis for specific quarters
+- `generate_comprehensive_heatmaps`: Component evolution visualizations
 
 ---
 
@@ -309,7 +311,7 @@ This writes:
 
 From `complete_ccci_ga_workflow` or manual calls you get:
 
-- **Attention weights** over lags for each \(t\): interpret historical precedents.
+- **Attention weights** over lags for each *t*: interpret historical precedents.
 - **Component magnitudes** (scalar / vectors / bivectors) through time.
 - **Query analysis** per specific quarter:
   - Feature-attribution by lag
@@ -339,7 +341,7 @@ visualize_query_analysis(qa, feature_cols, quarter_label="2015Q4",
 
 - **Scaling**: `prepare_ga_sequence_from_df` standardizes features on the **training** sample; keep the `scaler` for out-of-sample use.
 - **Lookback mismatch**: Preds start at `t=lookback`. Align targets accordingly (`y_full = raw[lookback:lookback+T_pred]`).
-- **Overfitting**: Prefer `head_type="linear"`, reduce `hidden_dim`, or increase `W_Q/W_K` weight decay.
+- **Overfitting**: Prefer `head_type="linear"`, reduce `hidden_dim`, or increase **W**<sub>*Q*</sub>/**W**<sub>*K*</sub> weight decay.
 - **Sparse bivectors**: Pass a subset of `bivector_planes` for simpler, more explainable interactions.
 - **GPU**: Set `device="cuda"` in training for speed.
 
@@ -347,7 +349,7 @@ visualize_query_analysis(qa, feature_cols, quarter_label="2015Q4",
 
 ## Citations
 
-📄 **Reference Paper:**  
+**Reference Paper:**  
 Agus Sudjianto & Sandi Setiawan (2025). *Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis.*  
 Available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797)
 
@@ -356,4 +358,4 @@ Available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797]
 ---
 
 **Module file:** `gats.py`  
-**Acronym:** *Geometric Algebra Transformer Systems*
+**Acronym:** *Geometric Algebra Transformer System

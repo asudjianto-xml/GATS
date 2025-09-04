@@ -3,7 +3,8 @@
 **GATS** (`gats.py`) implements a multivector-based **Geometric Algebra (GA)** representation coupled with **linear attention** for explanatory analysis of consumer credit cycles.  
 It is designed to **explain** the dynamics behind credit charge-offs, not just predict them.
 
-> Paper: *Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear‑Attention Framework for Explanatory Economic Analysis* (code and figures reproduced by this repo).
+> Paper: **GATS** (`gats.py`) implements a multivector-based **Geometric Algebra (GA)** representation coupled with **linear attention** for explanatory analysis of consumer credit cycles.  
+It is designed to **explain** the dynamics behind credit charge-offs, not just predict them..
 
 ---
 
@@ -346,11 +347,11 @@ visualize_query_analysis(qa, feature_cols, quarter_label="2015Q4",
 
 ## Citations
 
-- Bahdanau et al. (2014). *Neural Machine Translation by Jointly Learning to Align and Translate.*  
-- Vaswani et al. (2017). *Attention Is All You Need.*  
-- Choromanski et al. (2020). *Rethinking Attention with Performers.*  
-- Hestenes (1984). *New Foundations for Classical Mechanics.*  
-- Ghysels et al. (2006, 2007). *MIDAS regressions.*
+📄 **Reference Paper:**  
+Agus Sudjianto & Sandi Setiawan (2025). *Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis.*  
+Available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797)
+
+> This repository provides the full code implementation and reproducibility package for the paper, including training pipeline, interpretability analysis, and generation of Figures 1–7.
 
 ---
 

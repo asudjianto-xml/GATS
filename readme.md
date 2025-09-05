@@ -351,7 +351,7 @@ visualize_query_analysis(qa, feature_cols, quarter_label="2015Q4",
 
 **Reference Paper:**  
 Agus Sudjianto & Sandi Setiawan (2025). *Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis.*  
-Available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5441797)
+Available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5443034](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5443034)
 
 > This repository provides the full code implementation and reproducibility package for the paper, including training pipeline, interpretability analysis, and generation of Figures 1–7.
 

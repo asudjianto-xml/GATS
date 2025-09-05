@@ -3,7 +3,7 @@
 **GATS** (`gats.py`) implements a multivector-based **Geometric Algebra (GA)** representation coupled with **linear attention** for explanatory analysis of consumer credit cycles.  
 It is designed to **explain** the dynamics behind credit charge-offs, not just predict them.
 
-> Paper: "Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis" by Sudjianto & Setiawan (2025).
+> Paper: "Geometric Dynamics of Consumer Credit Cycles: A Multivector-based Linear-Attention Framework for Explanatory Economic Analysis" by Sudjianto & Setiawan (2025) available at SSRN: [https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5443034](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5443034)
 
 ---
 
